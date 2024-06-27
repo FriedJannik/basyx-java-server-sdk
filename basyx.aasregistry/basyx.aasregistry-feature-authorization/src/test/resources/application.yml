@@ -50,6 +50,7 @@ basyx:
     authorization:
       enabled: true
       type: rbac
+      securitySubmodelEnabled: true,
       jwtBearerTokenProvider: keycloak
       rbac:
         file: classpath:rbac_rules.json

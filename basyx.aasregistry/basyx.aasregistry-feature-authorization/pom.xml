@@ -56,5 +56,9 @@
 			<artifactId>basyx.aasregistry-service-inmemory-storage</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.eclipse.digitaltwin.basyx</groupId>
+            <artifactId>basyx.submodelrepository-feature-authorization</artifactId>
+        </dependency>
+    </dependencies>
 </project>

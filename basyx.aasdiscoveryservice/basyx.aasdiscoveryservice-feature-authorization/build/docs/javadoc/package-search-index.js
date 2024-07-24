@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.eclipse.digitaltwin.basyx.aasdiscoveryservice.feature.authorization"},{"l":"org.eclipse.digitaltwin.basyx.aasdiscoveryservice.feature.authorization.rbac"}];updateSearchResults();

@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"org.eclipse.digitaltwin.basyx.aasdiscoveryservice.backend.inmemory","l":"AasDiscoveryInMemoryBackendProvider"},{"p":"org.eclipse.digitaltwin.basyx.aasdiscoveryservice.backend.inmemory","l":"AasDiscoveryInMemoryCrudRepository"},{"l":"All Classes and Interfaces","u":"allclasses-index.html"}];updateSearchResults();

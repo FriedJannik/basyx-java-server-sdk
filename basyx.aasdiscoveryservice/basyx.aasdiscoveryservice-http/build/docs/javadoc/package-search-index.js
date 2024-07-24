@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.eclipse.digitaltwin.basyx.aasdiscoveryservice.http"},{"l":"org.eclipse.digitaltwin.basyx.aasdiscoveryservice.http.documentation"},{"l":"org.eclipse.digitaltwin.basyx.aasdiscoveryservice.http.pagination"}];updateSearchResults();

@@ -55,6 +55,9 @@ Trying to report a possible security vulnerability in BaSyx? Please check out ou
 
 Everyone interacting in BaSyx and its sub-projects' codebases, issue trackers, chat rooms, and mailing lists is expected to follow the BaSyx [code of conduct](https://github.com/eclipse-basyx/basyx-java-server-sdk?tab=coc-ov-file#readme).
 
+## Development Container
+For development, we provide a development container setup that can be used with Visual Studio Code or IntelliJ. It starts all necessary services and provides a development environment with all necessary tools needed to build BaSyx. VS Code will automatically detect the devcontainer configuration and ask you to open the project in the container. For IntelliJ, you open the dev container configuration in the IDE. The docker-compose file for the development container is located in the .devcontainer directory.
+
 ## License
 
 BaSyx is released under the [MIT License](https://opensource.org/licenses/MIT).

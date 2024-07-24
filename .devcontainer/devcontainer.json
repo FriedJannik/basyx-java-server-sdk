@@ -4,15 +4,15 @@
 	"dockerComposeFile":"docker-compose.yml",
 	"service": "java",
 	"workspaceFolder": "/workspace",
-	
-	"features": {
-		"ghcr.io/devcontainers/features/java:1": {
-			"version": "none",
-			"installMaven": "true",
-			"mavenVersion": "3.8.6",
-			"installGradle": "false"
-		}
-	},
+
+	// "features": {
+	// 	"ghcr.io/devcontainers/features/java:1": {
+	// 		"version": "none",
+	// 		"installMaven": "true",
+	// 		"mavenVersion": "3.8.6",
+	// 		"installGradle": "false"
+	// 	}
+	// },
 
 	// Configure tool-specific properties.
 	"customizations": {

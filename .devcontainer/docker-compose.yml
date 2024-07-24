@@ -5,8 +5,6 @@ services:
     container_name: java
     volumes:
       - .:/workspace:cached
-    environment:
-      - BASYX_VERSION=SNAPSHOT-2.0.0
     command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
       - 10080:8080

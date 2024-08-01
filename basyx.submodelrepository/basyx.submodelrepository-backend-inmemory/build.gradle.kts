@@ -16,7 +16,7 @@ dependencies {
     api(project(":basyx.filerepository-backend-inmemory"))
     testImplementation(project( path =":basyx.submodelrepository-core", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.submodelservice-core", configuration = "testArtifacts"))
-    testImplementation(project( path =":basyx.submodelservice-backend-inmemory", configuration = "testArtifacts"))
+    testImplementation(project( path =":basyx.submodelservice-backend-inmemory"))
 }
 
 description = "BaSyx submodelrepository-backend-inmemory"

@@ -34,7 +34,7 @@ public class ShellDescriptorSearchResponse implements Serializable {
 
   /**
    * Default constructor
-   * @deprecated Use {@link ShellDescriptorSearchResponse#ShellDescriptorSearchResponse(Long, List<@Valid AssetAdministrationShellDescriptor>)}
+   * @deprecated Use {@link ShellDescriptorSearchResponse#ShellDescriptorSearchResponse(Long, List<AssetAdministrationShellDescriptor>)}
    */
   @Deprecated
   public ShellDescriptorSearchResponse() {

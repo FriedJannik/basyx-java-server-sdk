@@ -32,7 +32,7 @@ public class ValueList implements Serializable {
 
   /**
    * Default constructor
-   * @deprecated Use {@link ValueList#ValueList(List<@Valid ValueReferencePair>)}
+   * @deprecated Use {@link ValueList#ValueList(List<ValueReferencePair>)}
    */
   @Deprecated
   public ValueList() {

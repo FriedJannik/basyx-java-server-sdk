@@ -16,15 +16,15 @@ dependencies {
     api(project(":basyx.submodelrepository-feature-registry-integration"))
     api(project(":basyx.aasregistry-client-native"))
     api(project(":basyx.submodelregistry-client-native"))
+    testImplementation(project( path =":basyx.aasenvironment-core", configuration = "testArtifacts"))
+    testImplementation(project( path =":basyx.aasservice-client", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.aasrepository-feature-registry-integration", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.submodelrepository-feature-registry-integration", configuration = "testArtifacts"))
-    testImplementation(project( path =":basyx.aasenvironment-core", configuration = "testArtifacts"))
-    testImplementation(libs.org.mockito.mockito.core)
-    testImplementation(project( path =":basyx.aasservice-client", configuration = "testArtifacts"))
-    testImplementation(project( path =":basyx.aasservice-core", configuration = "testArtifacts"))
-    testImplementation(project( path =":basyx.aasenvironment-feature-authorization", configuration = "testArtifacts"))
-    testImplementation(libs.org.apache.httpcomponents.client5.httpclient5)
     testImplementation(project( path =":basyx.http", configuration = "testArtifacts"))
+    testImplementation(project( path =":basyx.aasenvironment-feature-authorization"))
+    testImplementation(libs.org.mockito.mockito.core)
+
+    testImplementation(libs.org.apache.httpcomponents.client5.httpclient5)
 }
 
 description = "BaSyx AAS Environment Client"
@@ -36,6 +36,9 @@ val testsJar by tasks.registering(Jar::class) {
 configurations {
     create("testArtifacts") {
         extendsFrom(testRuntimeClasspath.get())
+    }
+    all {
+        exclude(group = "org.slf4j", module = "slf4j-simple")
     }
 }
 artifacts {

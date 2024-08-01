@@ -90,3 +90,6 @@ local.properties
 /.env
 
 **.iml
+
+
+**/build/

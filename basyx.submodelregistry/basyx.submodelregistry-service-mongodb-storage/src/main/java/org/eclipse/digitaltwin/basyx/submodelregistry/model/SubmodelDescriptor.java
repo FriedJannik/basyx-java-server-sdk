@@ -58,7 +58,7 @@ public class SubmodelDescriptor implements Serializable {
 
   /**
    * Default constructor
-   * @deprecated Use {@link SubmodelDescriptor#SubmodelDescriptor(String, List<@Valid Endpoint>)}
+   * @deprecated Use {@link SubmodelDescriptor#SubmodelDescriptor(String, List<Endpoint>)}
    */
   @Deprecated
   public SubmodelDescriptor() {

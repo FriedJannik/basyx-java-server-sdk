@@ -22,6 +22,8 @@ dependencies {
     testImplementation(libs.org.springframework.boot.spring.boot.starter.test)
     testImplementation(libs.org.apache.commons.commons.lang3)
     testImplementation(libs.org.junit.vintage.junit.vintage.engine)
+    compileOnly("org.projectlombok:lombok:1.18.20")
+    annotationProcessor("org.projectlombok:lombok:1.18.20")
 }
 
 description = "BaSyx AAS Registry Service Mongodb Storage"

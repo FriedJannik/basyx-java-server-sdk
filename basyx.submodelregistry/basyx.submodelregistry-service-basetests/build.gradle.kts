@@ -12,11 +12,13 @@ dependencies {
     api(libs.org.springframework.boot.spring.boot.starter.test)
     api(libs.org.junit.vintage.junit.vintage.engine)
     api(project(":basyx.authorization"))
-    api(project(":basyx.authorization"))
-    api(project(":basyx.http"))
+    api(project(path = ":basyx.authorization", configuration = "testArtifacts"))
+    api(project(path = ":basyx.http", configuration = "testArtifacts"))
     api(libs.org.apache.httpcomponents.client5.httpclient5)
     compileOnly(libs.org.projectlombok.lombok)
     compileOnly(project(":basyx.submodelregistry-service-basemodel"))
+    compileOnly("org.projectlombok:lombok:1.18.20")
+    annotationProcessor("org.projectlombok:lombok:1.18.20")
 }
 
 description = "BaSyx Submodel Registry Service Basetests"

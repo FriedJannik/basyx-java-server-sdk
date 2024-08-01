@@ -18,7 +18,7 @@ dependencies {
     testImplementation(project( path =":basyx.http", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.submodelrepository-core", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.submodelservice-core", configuration = "testArtifacts"))
-    testImplementation(project( path =":basyx.submodelrepository-backend-inmemory", configuration = "testArtifacts"))
+    testImplementation(project( path =":basyx.submodelrepository-backend-inmemory"))
     testImplementation(project( path =":basyx.submodelservice-backend-inmemory", configuration = "testArtifacts"))
     testImplementation(libs.org.apache.httpcomponents.client5.httpclient5)
     testImplementation(libs.commons.io.commons.io)

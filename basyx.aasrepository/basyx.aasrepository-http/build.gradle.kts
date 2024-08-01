@@ -15,8 +15,8 @@ dependencies {
     api(libs.jakarta.validation.jakarta.validation.api)
     api(libs.org.eclipse.digitaltwin.aas4j.aas4j.dataformat.json)
     testImplementation(project( path =":basyx.http", configuration = "testArtifacts"))
-    testImplementation(project( path =":basyx.aasservice-backend-inmemory", configuration = "testArtifacts"))
-    testImplementation(project( path =":basyx.aasrepository-backend-inmemory", configuration = "testArtifacts"))
+    testImplementation(project( path =":basyx.aasservice-backend-inmemory"))
+    testImplementation(project( path =":basyx.aasrepository-backend-inmemory"))
     testImplementation(libs.org.apache.httpcomponents.client5.httpclient5)
     testImplementation(libs.commons.io.commons.io)
 }

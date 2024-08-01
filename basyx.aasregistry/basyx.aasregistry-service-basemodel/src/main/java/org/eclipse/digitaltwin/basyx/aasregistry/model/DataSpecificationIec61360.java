@@ -68,7 +68,7 @@ public class DataSpecificationIec61360 implements Serializable, DataSpecificatio
 
   /**
    * Default constructor
-   * @deprecated Use {@link DataSpecificationIec61360#DataSpecificationIec61360(List<@Valid LangStringPreferredNameTypeIec61360>, String)}
+   * @deprecated Use {@link DataSpecificationIec61360#DataSpecificationIec61360(List<LangStringPreferredNameTypeIec61360>, String)}
    */
   @Deprecated
   public DataSpecificationIec61360() {

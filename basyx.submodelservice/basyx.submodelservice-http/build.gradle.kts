@@ -8,12 +8,13 @@ plugins {
 
 dependencies {
     api(project(":basyx.http"))
-    api(project(":basyx.http"))
     api(project(":basyx.submodelservice-core"))
     api(project(":basyx.submodelservice-backend-inmemory"))
     api(project(":basyx.submodelservice-core"))
     testImplementation(libs.org.apache.httpcomponents.client5.httpclient5)
     testImplementation(libs.commons.io.commons.io)
+    testImplementation(project(":basyx.submodelservice-core", configuration = "testArtifacts"))
+    testImplementation(project(":basyx.http", configuration = "testArtifacts"))
 }
 
 description = "BaSyx Submodel Service HTTP"

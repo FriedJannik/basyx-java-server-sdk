@@ -11,6 +11,8 @@ dependencies {
     api(libs.org.springframework.boot.spring.boot.starter.tomcat)
     api(libs.org.springdoc.springdoc.openapi.starter.webmvc.ui)
     api(libs.org.projectlombok.lombok)
+compileOnly("org.projectlombok:lombok:1.18.20")
+annotationProcessor("org.projectlombok:lombok:1.18.20")
     api(libs.jakarta.validation.jakarta.validation.api)
     api(libs.org.springframework.boot.spring.boot.starter.validation)
     api(libs.org.springframework.boot.spring.boot.starter.actuator)
@@ -23,6 +25,7 @@ dependencies {
     testImplementation(libs.org.springframework.boot.spring.boot.starter.test)
     testImplementation(libs.org.apache.commons.commons.lang3)
     compileOnly(project(":basyx.submodelregistry-service-basemodel"))
+
 }
 
 description = "BaSyx Submodel Registry Service"

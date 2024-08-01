@@ -35,7 +35,7 @@ public class ReferenceParent implements Serializable {
 
   /**
    * Default constructor
-   * @deprecated Use {@link ReferenceParent#ReferenceParent(ReferenceTypes, List<@Valid Key>)}
+   * @deprecated Use {@link ReferenceParent#ReferenceParent(ReferenceTypes, List<Key>)}
    */
   @Deprecated
   public ReferenceParent() {

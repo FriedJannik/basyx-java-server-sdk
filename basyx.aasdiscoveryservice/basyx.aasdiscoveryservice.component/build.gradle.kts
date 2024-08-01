@@ -47,3 +47,9 @@ artifacts {
 java {
     withJavadocJar()
 }
+
+tasks.named<Test>("test") {
+    useJUnitPlatform()
+
+    exclude("**/AasDiscoveryServiceIT*")
+}

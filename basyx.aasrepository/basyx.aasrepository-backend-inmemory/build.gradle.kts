@@ -15,6 +15,7 @@ dependencies {
     testImplementation(project( path =":basyx.aasrepository-core", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.aasservice-core", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.aasservice-backend-inmemory", configuration = "testArtifacts"))
+    testImplementation(project( path =":basyx.aasservice-backend-inmemory"))
 }
 
 description = "BaSyx AAS Repository backend-inmemory"

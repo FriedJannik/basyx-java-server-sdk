@@ -38,7 +38,7 @@ public class Reference implements Serializable {
 
   /**
    * Default constructor
-   * @deprecated Use {@link Reference#Reference(ReferenceTypes, List<@Valid Key>)}
+   * @deprecated Use {@link Reference#Reference(ReferenceTypes, List<Key>)}
    */
   @Deprecated
   public Reference() {

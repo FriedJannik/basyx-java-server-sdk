@@ -24,6 +24,8 @@ dependencies {
     testImplementation(libs.org.springframework.boot.spring.boot.starter.test)
     testImplementation(libs.org.apache.commons.commons.lang3)
     compileOnly(project(":basyx.aasregistry-service-basemodel"))
+    compileOnly("org.projectlombok:lombok:1.18.20")
+    annotationProcessor("org.projectlombok:lombok:1.18.20")
 }
 
 description = "BaSyx AAS Registry Service"

@@ -9,9 +9,12 @@ plugins {
 dependencies {
     api(project(":basyx.aasregistry-service"))
     api(project(":basyx.aasregistry-paths"))
+    api(project(":basyx.aasregistry-service-basemodel"))
     api(libs.org.projectlombok.lombok)
     testImplementation(project( path =":basyx.aasregistry-service-basetests", configuration = "testArtifacts"))
     compileOnly(project(":basyx.aasregistry-service-basemodel", configuration = "testArtifacts"))
+    compileOnly("org.projectlombok:lombok:1.18.20")
+    annotationProcessor("org.projectlombok:lombok:1.18.20")
 }
 
 description = "BaSyx AAS Registry Service Inmemory Storage"

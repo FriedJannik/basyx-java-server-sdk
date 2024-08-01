@@ -16,6 +16,8 @@ dependencies {
     api(libs.com.google.guava.guava)
     api(project(":basyx.submodelregistry-service"))
     api(libs.org.projectlombok.lombok)
+compileOnly("org.projectlombok:lombok:1.18.20")
+annotationProcessor("org.projectlombok:lombok:1.18.20")
     testImplementation(project( path =":basyx.submodelregistry-service-basetests", configuration = "testArtifacts"))
     testImplementation(libs.org.springframework.boot.spring.boot.starter.test)
     testImplementation(libs.org.apache.commons.commons.lang3)

@@ -8,7 +8,10 @@ plugins {
 
 dependencies {
     api(project(":basyx.submodelregistry-service"))
+    api(project(":basyx.submodelregistry-service-basemodel"))
     api(libs.org.projectlombok.lombok)
+compileOnly("org.projectlombok:lombok:1.18.20")
+annotationProcessor("org.projectlombok:lombok:1.18.20")
     testImplementation(project( path =":basyx.submodelregistry-service-basetests", configuration = "testArtifacts"))
     compileOnly(project(":basyx.submodelregistry-service-basemodel", configuration = "testArtifacts"))
 }

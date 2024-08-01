@@ -10,6 +10,8 @@ dependencies {
     api(libs.org.springframework.kafka.spring.kafka)
     api(project(":basyx.submodelregistry-service"))
     api(libs.org.projectlombok.lombok)
+compileOnly("org.projectlombok:lombok:1.18.20")
+annotationProcessor("org.projectlombok:lombok:1.18.20")
 }
 
 description = "BaSyx Submodel Registry Service Kafka Events"

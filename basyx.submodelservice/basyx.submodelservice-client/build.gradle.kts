@@ -9,6 +9,7 @@ plugins {
 dependencies {
     api(project(":basyx.submodelservice-core"))
     api(project(":basyx.authorization"))
+    api(project(":basyx.client"))
     testImplementation(project( path =":basyx.submodelrepository-http", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.submodelrepository-http", configuration = "testArtifacts"))
     testImplementation(project( path =":basyx.submodelservice-http", configuration = "testArtifacts"))

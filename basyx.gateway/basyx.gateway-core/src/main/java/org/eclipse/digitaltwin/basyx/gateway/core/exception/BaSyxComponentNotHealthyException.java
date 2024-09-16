@@ -23,18 +23,11 @@
  * SPDX-License-Identifier: MIT
  ******************************************************************************/
 
-package org.eclipse.digitaltwin.basyx.gateway.component;
+package org.eclipse.digitaltwin.basyx.gateway.core.exception;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+public class BaSyxComponentNotHealthyException extends RuntimeException{
 
-@SpringBootApplication(
-        scanBasePackages = "org.eclipse.digitaltwin.basyx",
-        exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
-public class GatewayComponent {
-    public static void main(String[] args) {
-        SpringApplication.run(GatewayComponent.class, args);
-    }
+        public BaSyxComponentNotHealthyException(String message) {
+            super(message);
+        }
 }

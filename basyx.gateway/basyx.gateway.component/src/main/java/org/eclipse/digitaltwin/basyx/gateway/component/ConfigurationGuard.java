@@ -25,6 +25,8 @@
 
 package org.eclipse.digitaltwin.basyx.gateway.component;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class ConfigurationGuard implements InitializingBean {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationGuard.class);
 
     @Value("${basyx.gateway.aas-repository:#{null}}")
     public String aasRepositoryURL;
@@ -52,20 +55,20 @@ public class ConfigurationGuard implements InitializingBean {
             printWarning(missingNonRequiredProperties);
         }
 
-        System.out.println("\n:::::::::::::::: BaSyx Gateway Configuration ::::::::::::::::");
+        logger.info("\n:::::::::::::::: BaSyx Gateway Configuration ::::::::::::::::");
         if (aasRepositoryURL != null) {
-            System.out.println(":: Default AAS Repository URL:         " + aasRepositoryURL);
+            logger.info(":: Default AAS Repository URL:         " + aasRepositoryURL);
         }
         if (submodelRepositoryURL != null) {
-            System.out.println(":: Default Submodel Repository URL:    " + submodelRepositoryURL);
+            logger.info(":: Default Submodel Repository URL:    " + submodelRepositoryURL);
         }
         if (aasRegistryURL != null) {
-            System.out.println(":: Default AAS Registry URL:           " + aasRegistryURL);
+            logger.info(":: Default AAS Registry URL:           " + aasRegistryURL);
         }
         if (submodelRegistryURL != null) {
-            System.out.println(":: Default Submodel Registry URL:      " + submodelRegistryURL);
+            logger.info(":: Default Submodel Registry URL:      " + submodelRegistryURL);
         }
-        System.out.println(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
+        logger.info(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
     }
 
 

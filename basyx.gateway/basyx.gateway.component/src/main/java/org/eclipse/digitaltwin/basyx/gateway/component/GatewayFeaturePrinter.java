@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2024 the Eclipse BaSyx Authors
+ * Copyright (C) 2023 the Eclipse BaSyx Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -23,18 +23,37 @@
  * SPDX-License-Identifier: MIT
  ******************************************************************************/
 
+
 package org.eclipse.digitaltwin.basyx.gateway.component;
+import java.util.List;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.eclipse.digitaltwin.basyx.gateway.core.feature.GatewayFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-@SpringBootApplication(
-        scanBasePackages = "org.eclipse.digitaltwin.basyx",
-        exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
-public class GatewayComponent {
-    public static void main(String[] args) {
-        SpringApplication.run(GatewayComponent.class, args);
+/**
+ * Prints all SubmodelRepository features that are on the classpath
+ *
+ * @author schnicke
+ *
+ */
+@Service
+public class GatewayFeaturePrinter {
+
+    private static final Logger logger = LoggerFactory.getLogger(GatewayFeaturePrinter.class);
+
+    @Autowired
+    public GatewayFeaturePrinter(List<GatewayFeature> features) {
+        logger.info("-------------------- BaSyx Gateway Features: --------------------");
+        if(features.isEmpty()){
+            logger.info("No BaSyx Gateway Features found");
+        }
+        for (GatewayFeature feature : features) {
+            logger.info("BaSyxFeature " + feature.getName() + " is enabled: " + feature.isEnabled());
+        }
+
+        logger.info("----------------------------------------------------------------- ");
     }
 }

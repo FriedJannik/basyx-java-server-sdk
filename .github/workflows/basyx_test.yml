@@ -245,7 +245,7 @@ jobs:
         run: docker compose --project-directory ./ci down
   test-basyx-gateway:
     runs-on: ubuntu-latest
-    name: AAS Discovery Service Test
+    name: Gateway Test
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17

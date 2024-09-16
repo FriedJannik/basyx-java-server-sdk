@@ -418,7 +418,7 @@ jobs:
 
   build-test-gateway:
     runs-on: ubuntu-latest
-    name: Submodel Repository - Build and Start Docker Image
+    name: Gateway - Build and Start Docker Image
     steps:
       - uses: actions/checkout@v4
 

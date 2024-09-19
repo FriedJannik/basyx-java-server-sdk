@@ -27,7 +27,7 @@ package org.eclipse.digitaltwin.basyx.gateway.http;
 
 import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShell;
 import org.eclipse.digitaltwin.basyx.gateway.core.exception.BaSyxComponentNotHealthyException;
-import org.eclipse.digitaltwin.basyx.gateway.core.feature.Gateway;
+import org.eclipse.digitaltwin.basyx.gateway.core.Gateway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;

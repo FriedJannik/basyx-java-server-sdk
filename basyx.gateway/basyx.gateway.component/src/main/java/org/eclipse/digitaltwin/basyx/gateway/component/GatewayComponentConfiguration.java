@@ -26,7 +26,7 @@
 package org.eclipse.digitaltwin.basyx.gateway.component;
 
 import org.eclipse.digitaltwin.basyx.gateway.core.DefaultGateway;
-import org.eclipse.digitaltwin.basyx.gateway.core.feature.Gateway;
+import org.eclipse.digitaltwin.basyx.gateway.core.Gateway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

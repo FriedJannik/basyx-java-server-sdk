@@ -23,42 +23,40 @@
  * SPDX-License-Identifier: MIT
  ******************************************************************************/
 
-package org.eclipse.digitaltwin.basyx.gateway.core;
+package org.eclipse.digitaltwin.basyx.gateway.core.registryintegration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShell;
-import org.eclipse.digitaltwin.basyx.aasrepository.client.ConnectedAasRepository;
+import org.eclipse.digitaltwin.basyx.aasregistry.client.ApiException;
+import org.eclipse.digitaltwin.basyx.aasregistry.client.api.RegistryAndDiscoveryInterfaceApi;
+import org.eclipse.digitaltwin.basyx.aasregistry.client.model.AssetAdministrationShellDescriptor;
+import org.eclipse.digitaltwin.basyx.aasregistry.main.client.factory.AasDescriptorFactory;
+import org.eclipse.digitaltwin.basyx.aasregistry.main.client.mapper.AttributeMapper;
 import org.eclipse.digitaltwin.basyx.core.exceptions.RepositoryRegistryLinkException;
-import org.eclipse.digitaltwin.basyx.gateway.core.exception.BaSyxComponentNotHealthyException;
-import org.eclipse.digitaltwin.basyx.gateway.core.registryintegration.AASRegistryIntegrator;
-import org.eclipse.digitaltwin.basyx.gateway.core.utils.GatewayUtils;
+import org.eclipse.digitaltwin.basyx.http.Aas4JHTTPSerializationExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+
+import java.util.List;
 
 /**
- * Default implementation of the Gateway interface
+ * Helper class to integrate Submodel into a Registry
  *
  * @author fried
  */
-public class DefaultGateway implements Gateway {
+public class SubmodelRegistryIntegrator {
+    private final String aasRegistryUrl;
+    private Logger logger = LoggerFactory.getLogger(SubmodelRegistryIntegrator.class);
 
-    private final GatewayUtils utils = new GatewayUtils();
 
-    @Override
-    public void createAAS(AssetAdministrationShell aas, String aasRepository, String aasRegistry) throws BaSyxComponentNotHealthyException {
-        utils.validateRepository(aasRepository);
+    public SubmodelRegistryIntegrator(String submodelRegistryURL){
+        this.aasRegistryUrl = submodelRegistryURL;
+    }
 
-        ConnectedAasRepository aasRepo = new ConnectedAasRepository(aasRepository);
-        aasRepo.createAas(aas);
-
-        if (!GatewayUtils.isRegistryDefined(aasRegistry)) {
-            return;
-        }
-
-        utils.validateRegistry(aasRegistry);
-
-        try {
-            AASRegistryIntegrator integrator = new AASRegistryIntegrator(aasRegistry);
-            integrator.registerAAS(aas, aasRepository);
-        } catch (RepositoryRegistryLinkException e) {
-            utils.handleRegistryLinkException(aasRepo, aas, aasRepository, aasRegistry, e);
-        }
+    public void registerAAS(AssetAdministrationShell aas, String aasURL){
+        throw new NotImplementedException();
     }
 }

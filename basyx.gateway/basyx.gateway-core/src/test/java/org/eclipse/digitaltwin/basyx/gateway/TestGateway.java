@@ -32,7 +32,7 @@ import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultAssetInformation;
 import org.eclipse.digitaltwin.basyx.gateway.core.DefaultGateway;
 import org.eclipse.digitaltwin.basyx.gateway.core.exception.BaSyxComponentNotHealthyException;
 import org.eclipse.digitaltwin.basyx.gateway.core.exception.RegistryUnavailableException;
-import org.eclipse.digitaltwin.basyx.gateway.core.feature.Gateway;
+import org.eclipse.digitaltwin.basyx.gateway.core.Gateway;
 import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.junit.After;
 import org.junit.Before;

@@ -61,7 +61,7 @@ public interface GatewayHTTPApi {
     ResponseEntity<?> postAssetAdministrationShell(
             @Parameter(in = ParameterIn.DEFAULT, description = "Asset Administration Shell object", required = true, schema = @Schema()) @Valid @RequestBody AssetAdministrationShell body,
             @Parameter(in = ParameterIn.QUERY, description = "The Asset Administration Shell Repository URL", schema = @Schema()) @RequestParam(value = "aasRepositoryURL", required = false) String aasRepositoryURL,
-            @Parameter(in = ParameterIn.QUERY, description = "The Asset Administration Shell Repository URL", schema = @Schema()) @RequestParam(value = "aasRegistryURL", required = false) String aasRegistryURL
+            @Parameter(in = ParameterIn.QUERY, description = "The Asset Administration Shell Registry URL", schema = @Schema()) @RequestParam(value = "aasRegistryURL", required = false) String aasRegistryURL
 
             );
 

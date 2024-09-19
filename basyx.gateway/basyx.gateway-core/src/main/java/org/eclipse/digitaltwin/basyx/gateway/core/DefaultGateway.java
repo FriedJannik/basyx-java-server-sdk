@@ -25,15 +25,27 @@
 
 package org.eclipse.digitaltwin.basyx.gateway.core;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShell;
+import org.eclipse.digitaltwin.basyx.aasregistry.main.client.factory.AasDescriptorFactory;
+import org.eclipse.digitaltwin.basyx.aasregistry.main.client.mapper.AttributeMapper;
+import org.eclipse.digitaltwin.basyx.aasrepository.client.ConnectedAasRepository;
+import org.eclipse.digitaltwin.basyx.core.exceptions.RepositoryRegistryLinkException;
 import org.eclipse.digitaltwin.basyx.gateway.core.exception.BaSyxComponentNotHealthyException;
 import org.eclipse.digitaltwin.basyx.gateway.core.feature.Gateway;
+import org.eclipse.digitaltwin.basyx.http.Aas4JHTTPSerializationExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.eclipse.digitaltwin.basyx.aasregistry.client.ApiException;
+import org.eclipse.digitaltwin.basyx.aasregistry.client.api.RegistryAndDiscoveryInterfaceApi;
+import org.eclipse.digitaltwin.basyx.aasregistry.client.model.AssetAdministrationShellDescriptor;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 public class DefaultGateway implements Gateway {
 
@@ -41,9 +53,27 @@ public class DefaultGateway implements Gateway {
 
     @Override
     public void createAAS(AssetAdministrationShell aas, String aasRepository, String aasRegistry) throws BaSyxComponentNotHealthyException{
+        System.out.println("Creating AAS "+aas.getId()+" in AAS Repository "+aasRepository+" and linking it with AAS Registry "+aasRegistry);
+        if(aasRepository == null) {
+            throw new UnsupportedOperationException("No AAS Repository configured");
+        }
         throwExceptionIfIsUnhealthyBaSyxComponent(aasRepository);
         if(aasRegistry != null){
             throwExceptionIfIsUnhealthyBaSyxComponent(aasRegistry);
+        }
+
+        ConnectedAasRepository aasRepo = new ConnectedAasRepository(aasRepository);
+        aasRepo.createAas(aas);
+
+        if(aasRegistry != null){
+            try {
+                integrateAasWithRegistry(aas, aasRegistry, aasRepository);
+            }catch(RepositoryRegistryLinkException e){
+                logger.error("Unable to link AAS "+aas.getId()+" with registry "+aasRegistry+". Rolling back...");
+                aasRepo.deleteAas(aas.getId());
+                logger.error("Rollback in AAS Repository "+aasRepository+" completed.");
+                throw new BaSyxComponentNotHealthyException("Unable to link AAS with registry. Changes in AAS Repository rolled back.");
+            }
         }
     }
 
@@ -75,7 +105,7 @@ public class DefaultGateway implements Gateway {
         try {
             HttpURLConnection connection = getRequest(componentURL, "/shells");
 
-            String aasMiddleware = connection.getHeaderField("AASMiddleware");
+            String aasMiddleware = connection.getHeaderField("aas_middleware");
 
             return "BaSyx".equals(aasMiddleware);
         } catch (Exception e) {
@@ -90,7 +120,7 @@ public class DefaultGateway implements Gateway {
 
             String body = new String(connection.getInputStream().readAllBytes());
 
-            return connection.getResponseCode() == 200 && body.equals("{'status':'UP'}");
+            return connection.getResponseCode() == 200 && body.contains("UP");
 
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -104,5 +134,32 @@ public class DefaultGateway implements Gateway {
         connection.setRequestMethod("GET");
         connection.connect();
         return connection;
+    }
+
+    private void integrateAasWithRegistry(AssetAdministrationShell shell,String aasRegistryUrl, String aasRepositoryUrl) throws RepositoryRegistryLinkException{
+        List<String> aasRepositoryURLs = List.of(aasRepositoryUrl);
+        AttributeMapper attributeMapper = getAttributeMapper();
+
+        AssetAdministrationShellDescriptor descriptor = new AasDescriptorFactory(shell, aasRepositoryURLs, attributeMapper).create();
+
+        RegistryAndDiscoveryInterfaceApi registryApi = new RegistryAndDiscoveryInterfaceApi(aasRegistryUrl);
+
+        try {
+            registryApi.postAssetAdministrationShellDescriptor(descriptor);
+
+        } catch (ApiException e) {
+            throw new RepositoryRegistryLinkException(shell.getId(), e);
+        }
+        logger.info("Shell '{}' has been automatically linked with the Registry", shell.getId());
+
+    }
+
+    private static AttributeMapper getAttributeMapper() {
+        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder().serializationInclusion(JsonInclude.Include.NON_NULL);
+        Aas4JHTTPSerializationExtension extension = new Aas4JHTTPSerializationExtension();
+        extension.extend(builder);
+        ObjectMapper objectMapper = builder.build();
+        AttributeMapper attributeMapper = new AttributeMapper(objectMapper);
+        return attributeMapper;
     }
 }

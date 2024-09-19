@@ -26,6 +26,8 @@
 package org.eclipse.digitaltwin.basyx.gateway.http;
 
 import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShell;
+import org.eclipse.digitaltwin.basyx.gateway.core.exception.BaSyxComponentNotHealthyException;
+import org.eclipse.digitaltwin.basyx.gateway.core.feature.Gateway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
@@ -44,14 +46,24 @@ public class GatewayHTTPApiController implements GatewayHTTPApi{
     @Value("${basyx.gateway.submodel-registry:#{null}}")
     public String submodelRegistryURL;
 
+    private final Gateway gateway;
+
+    public GatewayHTTPApiController(Gateway gateway){
+        this.gateway = gateway;
+    }
+
     @Override
     public ResponseEntity<?> postAssetAdministrationShell(AssetAdministrationShell body, String aasRepositoryURL, String aasRegistryURL) {
         if(!isAnyURLSet(aasRepositoryURL, this.aasRepositoryURL)){
            return ResponseEntity.badRequest().body("No AAS Repository URL set");
+        }
+        try {
+            gateway.createAAS(body, aasRepositoryURL == null ? this.aasRepositoryURL : aasRepositoryURL, aasRegistryURL);
+        }catch(BaSyxComponentNotHealthyException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 
         }
-
-        return null;
+        return new ResponseEntity<AssetAdministrationShell>(body, HttpStatus.CREATED);
     }
 
     private static boolean isAnyURLSet(String url1, String url2) {

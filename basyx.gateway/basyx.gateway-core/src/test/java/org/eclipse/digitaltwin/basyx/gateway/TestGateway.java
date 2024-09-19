@@ -26,6 +26,9 @@
 package org.eclipse.digitaltwin.basyx.gateway;
 
 import org.apache.http.HttpStatus;
+import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShell;
+import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultAssetAdministrationShell;
+import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultAssetInformation;
 import org.eclipse.digitaltwin.basyx.gateway.core.DefaultGateway;
 import org.eclipse.digitaltwin.basyx.gateway.core.exception.BaSyxComponentNotHealthyException;
 import org.eclipse.digitaltwin.basyx.gateway.core.feature.Gateway;
@@ -35,6 +38,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpResponse;
 import org.mockserver.verify.VerificationTimes;
 
 public class TestGateway {
@@ -56,70 +60,62 @@ public class TestGateway {
 
     @Test
     public void testCreateAASWithHealthyBaSyxComponent(){
-        new MockServerClient("localhost", 6006)
-                .when(org.mockserver.model.HttpRequest.request()
-                        .withMethod("GET")
-                        .withPath("/shells"))
-                .respond(org.mockserver.model.HttpResponse.response()
-                        .withStatusCode(HttpStatus.SC_OK)
-                        .withHeader("AASMiddleware","BaSyx")
-                        .withBody("{}"));
-        new MockServerClient("localhost", 6006)
-                .when(org.mockserver.model.HttpRequest.request()
-                        .withMethod("GET")
-                        .withPath("/actuator/health"))
-                .respond(org.mockserver.model.HttpResponse.response()
-                        .withStatusCode(HttpStatus.SC_OK)
-                        .withBody("{'status':'UP'}"));
-        gateway.createAAS(null, "http://localhost:6006", null);
+        getExpectations(HttpResponse.response()
+                .withStatusCode(HttpStatus.SC_OK)
+                .withHeader("AASMiddleware", "BaSyx"), "{'status':'UP'}");
+        gateway.createAAS(getDummyShell(), "http://localhost:6006", null);
         verifyCall("/shells",1);
         verifyCall("/actuator/health",1);
     }
 
     @Test(expected = BaSyxComponentNotHealthyException.class)
     public void testCreateAASWithUnhealthyBaSyxComponent(){
-        new MockServerClient("localhost", 6006)
-                .when(org.mockserver.model.HttpRequest.request()
-                        .withMethod("GET")
-                        .withPath("/shells"))
-                .respond(org.mockserver.model.HttpResponse.response()
-                        .withStatusCode(HttpStatus.SC_OK)
-                        .withHeader("AASMiddleware","BaSyx")
-                        .withBody("{}"));
-        new MockServerClient("localhost", 6006)
-                .when(org.mockserver.model.HttpRequest.request()
-                        .withMethod("GET")
-                        .withPath("/actuator/health"))
-                .respond(org.mockserver.model.HttpResponse.response()
-                        .withStatusCode(HttpStatus.SC_OK)
-                        .withBody("{'status':'DOWN'}"));
-        gateway.createAAS(null, "http://localhost:6006", null);
+        getExpectations(HttpResponse.response()
+                .withStatusCode(HttpStatus.SC_OK)
+                .withHeader("AASMiddleware", "BaSyx"), "{'status':'DOWN'}");
+        gateway.createAAS(getDummyShell(), "http://localhost:6006", null);
     }
 
     @Test
     public void testCreateAASWithNonBaSyxComponent(){
+        getExpectations(org.mockserver.model.HttpResponse.response()
+                .withStatusCode(HttpStatus.SC_OK), "{'status':'UP'}");
+        gateway.createAAS(getDummyShell(), "http://localhost:6006", null);
+        verifyCall("/shells",1);
+        verifyCall("/actuator/health",0);
+    }
+
+    private static void getExpectations(HttpResponse SC_OK, String responseBody) {
         new MockServerClient("localhost", 6006)
                 .when(org.mockserver.model.HttpRequest.request()
                         .withMethod("GET")
                         .withPath("/shells"))
-                .respond(org.mockserver.model.HttpResponse.response()
+                .respond(SC_OK
+                        .withBody("{}"));
+        new MockServerClient("localhost", 6006)
+                .when(org.mockserver.model.HttpRequest.request()
+                        .withMethod("POST")
+                        .withPath("/shells"))
+                .respond(HttpResponse.response()
                         .withStatusCode(HttpStatus.SC_OK)
+                        .withHeader("AASMiddleware", "BaSyx")
                         .withBody("{}"));
         new MockServerClient("localhost", 6006)
                 .when(org.mockserver.model.HttpRequest.request()
                         .withMethod("GET")
                         .withPath("/actuator/health"))
-                .respond(org.mockserver.model.HttpResponse.response()
+                .respond(HttpResponse.response()
                         .withStatusCode(HttpStatus.SC_OK)
-                        .withBody("{'status':'UP'}"));
-        gateway.createAAS(null, "http://localhost:6006", null);
-        verifyCall("/shells",1);
-        verifyCall("/actuator/health",0);
+                        .withBody(responseBody));
     }
 
     private void verifyCall(String path, int timesCalled) {
         new MockServerClient("localhost", 6006).verify(org.mockserver.model.HttpRequest.request().withMethod("GET")
                 .withPath(path)
                 , VerificationTimes.exactly(timesCalled));
+    }
+
+    private AssetAdministrationShell getDummyShell(){
+        return new DefaultAssetAdministrationShell.Builder().id("TestId").idShort("test").assetInformation(new DefaultAssetInformation.Builder().build()).build();
     }
 }

@@ -35,6 +35,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Class that prints error and warning messages to inform the user about possible misconfiguration
+ *
+ * @author fried
+ */
 @Component
 public class ConfigurationGuard implements InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationGuard.class);
@@ -55,7 +60,7 @@ public class ConfigurationGuard implements InitializingBean {
             printWarning(missingNonRequiredProperties);
         }
 
-        logger.info("\n:::::::::::::::: BaSyx Gateway Configuration ::::::::::::::::");
+        logger.info(":::::::::::::::: BaSyx Gateway Configuration ::::::::::::::::");
         if (aasRepositoryURL != null) {
             logger.info(":: Default AAS Repository URL:         " + aasRepositoryURL);
         }

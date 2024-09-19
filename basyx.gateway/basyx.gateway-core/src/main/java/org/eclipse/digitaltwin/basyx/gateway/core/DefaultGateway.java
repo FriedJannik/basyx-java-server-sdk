@@ -53,30 +53,45 @@ public class DefaultGateway implements Gateway {
     private Logger logger = LoggerFactory.getLogger(DefaultGateway.class);
 
     @Override
-    public void createAAS(AssetAdministrationShell aas, String aasRepository, String aasRegistry) throws BaSyxComponentNotHealthyException{
-        System.out.println("Creating AAS "+aas.getId()+" in AAS Repository "+aasRepository+" and linking it with AAS Registry "+aasRegistry);
-        if(aasRepository == null) {
-            throw new UnsupportedOperationException("No AAS Repository configured");
-        }
-        throwExceptionIfIsUnhealthyBaSyxRepository(aasRepository);
-        if(aasRegistry != null){
-            throwExceptionIfIsUnhealthyBaSyxRegistry(aasRegistry);
-        }
+    public void createAAS(AssetAdministrationShell aas, String aasRepository, String aasRegistry) throws BaSyxComponentNotHealthyException {
+        logger.info("Creating AAS {} in AAS Repository {} and linking it with AAS Registry {}", aas.getId(), aasRepository, aasRegistry);
+
+        validateRepository(aasRepository);
 
         ConnectedAasRepository aasRepo = new ConnectedAasRepository(aasRepository);
         aasRepo.createAas(aas);
 
-        if(aasRegistry != null){
-            try {
-                integrateAasWithRegistry(aas, aasRegistry, aasRepository);
-            }catch(RepositoryRegistryLinkException e){
-                logger.error("Unable to link AAS "+aas.getId()+" with registry "+aasRegistry+". Rolling back...");
-                aasRepo.deleteAas(aas.getId());
-                logger.error("Rollback in AAS Repository "+aasRepository+" completed.");
-                throw new RegistryUnavailableException("Unable to link AAS with registry. Changes in AAS Repository rolled back.");
-            }
+        if (aasRegistry == null) {
+            return;
+        }
+
+        validateRegistry(aasRegistry);
+
+        try {
+            integrateAasWithRegistry(aas, aasRegistry, aasRepository);
+        } catch (RepositoryRegistryLinkException e) {
+            handleRegistryLinkException(aasRepo, aas, aasRepository, aasRegistry, e);
         }
     }
+
+    private void validateRepository(String aasRepository) throws BaSyxComponentNotHealthyException {
+        if (aasRepository == null) {
+            throw new UnsupportedOperationException("No AAS Repository configured");
+        }
+        throwExceptionIfIsUnhealthyBaSyxRepository(aasRepository);
+    }
+
+    private void validateRegistry(String aasRegistry) throws BaSyxComponentNotHealthyException {
+        throwExceptionIfIsUnhealthyBaSyxRegistry(aasRegistry);
+    }
+
+    private void handleRegistryLinkException(ConnectedAasRepository aasRepo, AssetAdministrationShell aas, String aasRepository, String aasRegistry, RepositoryRegistryLinkException e) throws RegistryUnavailableException {
+        logger.error("Unable to link AAS {} with registry {}. Rolling back...", aas.getId(), aasRegistry);
+        aasRepo.deleteAas(aas.getId());
+        logger.error("Rollback in AAS Repository {} completed.", aasRepository);
+        throw new RegistryUnavailableException("Unable to link AAS with registry. Changes in AAS Repository rolled back.");
+    }
+
 
     private void throwExceptionIfIsUnhealthyBaSyxRepository(String componentURL) {
         componentURL = formatURL(componentURL);

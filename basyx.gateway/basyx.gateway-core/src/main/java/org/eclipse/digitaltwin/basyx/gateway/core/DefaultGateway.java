@@ -33,6 +33,7 @@ import org.eclipse.digitaltwin.basyx.aasregistry.main.client.mapper.AttributeMap
 import org.eclipse.digitaltwin.basyx.aasrepository.client.ConnectedAasRepository;
 import org.eclipse.digitaltwin.basyx.core.exceptions.RepositoryRegistryLinkException;
 import org.eclipse.digitaltwin.basyx.gateway.core.exception.BaSyxComponentNotHealthyException;
+import org.eclipse.digitaltwin.basyx.gateway.core.exception.RegistryUnavailableException;
 import org.eclipse.digitaltwin.basyx.gateway.core.feature.Gateway;
 import org.eclipse.digitaltwin.basyx.http.Aas4JHTTPSerializationExtension;
 import org.slf4j.Logger;
@@ -57,9 +58,9 @@ public class DefaultGateway implements Gateway {
         if(aasRepository == null) {
             throw new UnsupportedOperationException("No AAS Repository configured");
         }
-        throwExceptionIfIsUnhealthyBaSyxComponent(aasRepository);
+        throwExceptionIfIsUnhealthyBaSyxRepository(aasRepository);
         if(aasRegistry != null){
-            throwExceptionIfIsUnhealthyBaSyxComponent(aasRegistry);
+            throwExceptionIfIsUnhealthyBaSyxRegistry(aasRegistry);
         }
 
         ConnectedAasRepository aasRepo = new ConnectedAasRepository(aasRepository);
@@ -72,15 +73,23 @@ public class DefaultGateway implements Gateway {
                 logger.error("Unable to link AAS "+aas.getId()+" with registry "+aasRegistry+". Rolling back...");
                 aasRepo.deleteAas(aas.getId());
                 logger.error("Rollback in AAS Repository "+aasRepository+" completed.");
-                throw new BaSyxComponentNotHealthyException("Unable to link AAS with registry. Changes in AAS Repository rolled back.");
+                throw new RegistryUnavailableException("Unable to link AAS with registry. Changes in AAS Repository rolled back.");
             }
         }
     }
 
-    private void throwExceptionIfIsUnhealthyBaSyxComponent(String componentURL) {
+    private void throwExceptionIfIsUnhealthyBaSyxRepository(String componentURL) {
         componentURL = formatURL(componentURL);
 
-        if (isBaSyxComponent(componentURL) && !isHealthy(componentURL)) {
+        if (isBaSyxRepository(componentURL) && !isHealthy(componentURL)) {
+            throw new BaSyxComponentNotHealthyException(componentURL + " is not healthy");
+        }
+    }
+
+    private void throwExceptionIfIsUnhealthyBaSyxRegistry(String componentURL) {
+        componentURL = formatURL(componentURL);
+
+        if (isBaSyxRegistry(componentURL) && !isHealthy(componentURL)) {
             throw new BaSyxComponentNotHealthyException(componentURL + " is not healthy");
         }
     }
@@ -101,9 +110,21 @@ public class DefaultGateway implements Gateway {
         return componentURL;
     }
 
-    private boolean isBaSyxComponent(String componentURL) {
+    private boolean isBaSyxRepository(String componentURL) {
         try {
             HttpURLConnection connection = getRequest(componentURL, "/shells");
+
+            String aasMiddleware = connection.getHeaderField("aas_middleware");
+
+            return "BaSyx".equals(aasMiddleware);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return false;
+        }
+    }
+    private boolean isBaSyxRegistry(String componentURL) {
+        try {
+            HttpURLConnection connection = getRequest(componentURL, "/shell-descriptors");
 
             String aasMiddleware = connection.getHeaderField("aas_middleware");
 

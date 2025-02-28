@@ -25,6 +25,8 @@
 
 package org.eclipse.digitaltwin.basyx.submodelrepository.backend;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.eclipse.digitaltwin.aas4j.v3.model.OperationVariable;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.digitaltwin.aas4j.v3.model.SubmodelElement;
@@ -32,8 +34,12 @@ import org.eclipse.digitaltwin.basyx.core.exceptions.*;
 import org.eclipse.digitaltwin.basyx.core.pagination.CursorResult;
 import org.eclipse.digitaltwin.basyx.core.pagination.PaginationInfo;
 import org.eclipse.digitaltwin.basyx.core.pagination.PaginationSupport;
+import org.eclipse.digitaltwin.basyx.core.qtypes.QQuerySubmodel;
+import org.eclipse.digitaltwin.basyx.core.qtypes.QuerySubmodel;
+import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.digitaltwin.basyx.serialization.SubmodelMetadataUtil;
 import org.eclipse.digitaltwin.basyx.submodelrepository.SubmodelRepository;
+import org.eclipse.digitaltwin.basyx.submodelrepository.backend.predicate.SubmodelPredicateBuilder;
 import org.eclipse.digitaltwin.basyx.submodelservice.SubmodelService;
 import org.eclipse.digitaltwin.basyx.submodelservice.SubmodelServiceFactory;
 import org.eclipse.digitaltwin.basyx.submodelservice.backend.SubmodelBackend;
@@ -58,17 +64,18 @@ public class CrudSubmodelRepository implements SubmodelRepository {
 	private final SubmodelBackend submodelBackend;
 	private final SubmodelServiceFactory submodelServiceFactory;
 	private final String submodelRepositoryName;
+	private final JPAQueryFactory queryFactory;
 
-	public CrudSubmodelRepository(SubmodelBackend submodelBackend, SubmodelServiceFactory submodelServiceFactory, String submodelRepositoryName) {
+	public CrudSubmodelRepository(SubmodelBackend submodelBackend, SubmodelServiceFactory submodelServiceFactory, String submodelRepositoryName, JPAQueryFactory queryFactory) {
 		this.submodelBackend = submodelBackend;
 		this.submodelServiceFactory = submodelServiceFactory;
 		this.submodelRepositoryName = submodelRepositoryName;
-
+		this.queryFactory = queryFactory;
 	}
 
 	public CrudSubmodelRepository(SubmodelBackend submodelBackend, SubmodelServiceFactory submodelServiceFactory, String submodelRepositoryName,
-			Collection<Submodel> submodels) {
-		this(submodelBackend, submodelServiceFactory, submodelRepositoryName);
+			Collection<Submodel> submodels, JPAQueryFactory queryFactory) {
+		this(submodelBackend, submodelServiceFactory, submodelRepositoryName, queryFactory);
 
 		initializeRemoteCollection(submodels);
 	}
@@ -83,32 +90,62 @@ public class CrudSubmodelRepository implements SubmodelRepository {
 		Iterable<Submodel> iterable = submodelBackend.findAll();
 		List<Submodel> submodels = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList());
 
-		TreeMap<String, Submodel> submodelMap = submodels.stream().collect(Collectors.toMap(Submodel::getId, submodel -> submodel, (a, b) -> a, TreeMap::new));
+		return getListCursorResult(pInfo, submodels);
+	}
+
+	public CursorResult<List<Submodel>> getAllSubmodels(PaginationInfo pInfo, List<String> submodelIdFilter) {
+		if (submodelIdFilter == null || submodelIdFilter.isEmpty()) {
+			return getAllSubmodels(pInfo);
+		}
+
+		// Build the predicate using our helper method.
+		Predicate predicate = SubmodelPredicateBuilder.buildSubmodelIdPredicate(submodelIdFilter);
+
+		// Use Querydsl to fetch only the matching SubmodelEntity records.
+		List<QuerySubmodel> entities = queryFactory
+				.selectFrom(QQuerySubmodel.querySubmodel)
+				.where(predicate)
+				.fetch();
+
+		// Convert the fetched entities to the Submodel interface if necessary.
+		List<Submodel> submodels = new ArrayList<>(entities);
+
+		// Build the TreeMap for pagination (using Submodel id as key)
+		return getListCursorResult(pInfo, submodels);
+	}
+
+	private CursorResult<List<Submodel>> getListCursorResult(PaginationInfo pInfo, List<Submodel> submodels) {
+		TreeMap<String, Submodel> submodelMap = submodels.stream()
+				.collect(Collectors.toMap(Submodel::getId, s -> s, (a, b) -> a, TreeMap::new));
 
 		PaginationSupport<Submodel> paginationSupport = new PaginationSupport<>(submodelMap, Submodel::getId);
-
 		return paginationSupport.getPaged(pInfo);
 	}
 
 	@Override
 	public CursorResult<List<Submodel>> getAllSubmodels(String semanticId, PaginationInfo pInfo) {
-		Iterable<Submodel> iterable = submodelBackend.findAll(); 
-		List<Submodel> submodels = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList());
+//		Iterable<Submodel> iterable = submodelBackend.findAll();
+//		List<Submodel> submodels = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList());
+//
+//	    List<Submodel> filteredSubmodels = submodels.stream()
+//	    		.filter((submodel) -> {
+//	    			return submodel.getSemanticId() != null &&
+//	    				submodel.getSemanticId().getKeys().stream().filter((key) -> {
+//	    					return key.getValue().equals(semanticId);
+//	    				}).findAny().isPresent();
+//	    		})
+//	    		.collect(Collectors.toList());
+		// Build the predicate using our helper method.
+		Predicate predicate = SubmodelPredicateBuilder.buildSubmodelSemanticIdPredicate(semanticId);
 
-	    List<Submodel> filteredSubmodels = submodels.stream()
-	    		.filter((submodel) -> {
-	    			return submodel.getSemanticId() != null && 
-	    				submodel.getSemanticId().getKeys().stream().filter((key) -> {
-	    					return key.getValue().equals(semanticId);
-	    				}).findAny().isPresent();
-	    		})
-	    		.collect(Collectors.toList());
-	    
-		TreeMap<String, Submodel> submodelMap = filteredSubmodels.stream().collect(Collectors.toMap(Submodel::getId, submodel -> submodel, (a, b) -> a, TreeMap::new));
+		// Use Querydsl to fetch only the matching SubmodelEntity records.
+		List<QuerySubmodel> entities = queryFactory
+				.selectFrom(QQuerySubmodel.querySubmodel)
+				.where(predicate)
+				.fetch();
+		List<Submodel> submodels = new ArrayList<>(entities);
 
-		PaginationSupport<Submodel> paginationSupport = new PaginationSupport<>(submodelMap, Submodel::getId);
-
-		return paginationSupport.getPaged(pInfo);
+		return getListCursorResult(pInfo, submodels);
 	}
 
 	@Override

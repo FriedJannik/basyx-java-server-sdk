@@ -25,6 +25,7 @@
 
 package org.eclipse.digitaltwin.basyx.submodelrepository.backend;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
 import org.eclipse.digitaltwin.basyx.core.filerepository.FileRepository;
 import org.eclipse.digitaltwin.basyx.submodelrepository.SubmodelRepository;
@@ -55,13 +56,15 @@ public class CrudSubmodelRepositoryFactory implements SubmodelRepositoryFactory 
     private final SubmodelBackend backend;
     private final SubmodelServiceFactory submodelServiceFactory;
     private final String submodelRepositoryName;
+    private final JPAQueryFactory queryFactory;
     private Optional<Collection<Submodel>> submodels = Optional.empty();
 
     @Autowired
-    public CrudSubmodelRepositoryFactory(SubmodelBackend submodelRepositoryBackend, SubmodelServiceFactory submodelServiceFactory, @Value("${basyx.smrepo.name:" + DEFAULT_REPOSITORY_NAME + "}") String submodelRepositoryName) {
+    public CrudSubmodelRepositoryFactory(SubmodelBackend submodelRepositoryBackend, SubmodelServiceFactory submodelServiceFactory, @Value("${basyx.smrepo.name:" + DEFAULT_REPOSITORY_NAME + "}") String submodelRepositoryName, JPAQueryFactory queryFactory) {
         this.backend = submodelRepositoryBackend;
         this.submodelServiceFactory = submodelServiceFactory;
         this.submodelRepositoryName = submodelRepositoryName;
+        this.queryFactory = queryFactory;
     }
 
     public void setRemoteCollection(Collection<Submodel> submodels) {
@@ -70,8 +73,8 @@ public class CrudSubmodelRepositoryFactory implements SubmodelRepositoryFactory 
 
     @Override
     public SubmodelRepository create() {
-        return submodels.map(submodelCollection -> new CrudSubmodelRepository(backend, submodelServiceFactory, submodelRepositoryName, submodelCollection))
-                .orElseGet(() -> new CrudSubmodelRepository(backend, submodelServiceFactory, submodelRepositoryName));
+        return submodels.map(submodelCollection -> new CrudSubmodelRepository(backend, submodelServiceFactory, submodelRepositoryName, submodelCollection, queryFactory))
+                .orElseGet(() -> new CrudSubmodelRepository(backend, submodelServiceFactory, submodelRepositoryName, queryFactory));
     }
 
     public static Builder builder(){
@@ -83,6 +86,7 @@ public class CrudSubmodelRepositoryFactory implements SubmodelRepositoryFactory 
         private FileRepository fileRepository;
         private Optional<String> repositoryName = Optional.empty();
         private Optional<Collection<Submodel>> submodels = Optional.empty();
+        private JPAQueryFactory queryFactory;
 
         public Builder backend(SubmodelBackend submodelBackend) {
             this.submodelBackend = submodelBackend;
@@ -104,13 +108,18 @@ public class CrudSubmodelRepositoryFactory implements SubmodelRepositoryFactory 
             return this;
         }
 
+        public Builder queryFactory(JPAQueryFactory queryFactory){
+            this.queryFactory = queryFactory;
+            return this;
+        }
+
         public CrudSubmodelRepositoryFactory buildFactory(){
             assert submodelBackend != null;
             assert fileRepository != null;
 
             CrudSubmodelServiceFactory submodelServiceFactory = new CrudSubmodelServiceFactory(submodelBackend, fileRepository);
 
-            CrudSubmodelRepositoryFactory submodelRepositoryFactory = new CrudSubmodelRepositoryFactory(submodelBackend, submodelServiceFactory, repositoryName.orElse(DEFAULT_REPOSITORY_NAME));
+            CrudSubmodelRepositoryFactory submodelRepositoryFactory = new CrudSubmodelRepositoryFactory(submodelBackend, submodelServiceFactory, repositoryName.orElse(DEFAULT_REPOSITORY_NAME),queryFactory);
 
             submodels.ifPresent(submodelRepositoryFactory::setRemoteCollection);
 

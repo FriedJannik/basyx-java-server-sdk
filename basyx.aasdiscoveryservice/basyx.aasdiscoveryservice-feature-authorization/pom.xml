@@ -14,6 +14,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.digitaltwin.basyx</groupId>
+			<artifactId>basyx.backend.inmemory.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.digitaltwin.basyx</groupId>
 			<artifactId>basyx.aasdiscoveryservice-core</artifactId>
 			<classifier>tests</classifier>
 			<scope>test</scope>

@@ -121,5 +121,8 @@ public class InMemoryCrudRepository<T> implements CrudRepository<T, String> {
 		inMemoryStore.clear();
 	}
 
+	protected ConcurrentMap<String, T> getInMemoryStore() {
+		return inMemoryStore;
+	}
 
 }

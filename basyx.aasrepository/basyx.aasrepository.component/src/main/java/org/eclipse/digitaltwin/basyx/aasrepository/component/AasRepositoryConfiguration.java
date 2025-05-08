@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2023 the Eclipse BaSyx Authors
+ * Copyright (C) 2025 the Eclipse BaSyx Authors
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,8 +25,6 @@
 
 package org.eclipse.digitaltwin.basyx.aasrepository.component;
 
-import java.util.List;
-
 import org.eclipse.digitaltwin.basyx.aasrepository.AasRepository;
 import org.eclipse.digitaltwin.basyx.aasrepository.AasRepositoryFactory;
 import org.eclipse.digitaltwin.basyx.aasrepository.feature.AasRepositoryFeature;
@@ -40,11 +38,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import java.util.List;
+
 /**
  * Provides the spring bean configuration for the {@link AasRepository} and
  * {@link AasService} utilizing all found features for the respective services
  * 
- * @author schnicke
+ * @author schnicke, mateusmolina
  *
  */
 @Configuration
@@ -57,7 +57,7 @@ public class AasRepositoryConfiguration {
 
 	@Primary
 	@Bean
-	public static AasServiceFactory getAasService(AasServiceFactory aasServiceFactory, List<AasServiceFeature> features) {
+	public AasServiceFactory getAasServiceFactory(AasServiceFactory aasServiceFactory, List<AasServiceFeature> features) {
 		return new DecoratedAasServiceFactory(aasServiceFactory, features);
 	}
 }

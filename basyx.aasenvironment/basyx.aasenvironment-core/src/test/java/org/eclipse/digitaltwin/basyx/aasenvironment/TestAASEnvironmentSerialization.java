@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2024 the Eclipse BaSyx Authors
+ * Copyright (C) 2025 the Eclipse BaSyx Authors
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,14 +25,6 @@
 
 package org.eclipse.digitaltwin.basyx.aasenvironment;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.InvalidOperationException;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.aasx.AASXDeserializer;
@@ -41,40 +33,41 @@ import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.DeserializationException
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.core.SerializationException;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.json.JsonDeserializer;
 import org.eclipse.digitaltwin.aas4j.v3.dataformat.xml.XmlDeserializer;
-import org.eclipse.digitaltwin.aas4j.v3.model.AssetAdministrationShell;
-import org.eclipse.digitaltwin.aas4j.v3.model.AssetKind;
-import org.eclipse.digitaltwin.aas4j.v3.model.ConceptDescription;
-import org.eclipse.digitaltwin.aas4j.v3.model.Environment;
-import org.eclipse.digitaltwin.aas4j.v3.model.Submodel;
+import org.eclipse.digitaltwin.aas4j.v3.model.*;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultAssetAdministrationShell;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultAssetInformation;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultConceptDescription;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultSubmodel;
 import org.eclipse.digitaltwin.basyx.aasenvironment.base.DefaultAASEnvironment;
 import org.eclipse.digitaltwin.basyx.aasrepository.AasRepository;
-import org.eclipse.digitaltwin.basyx.aasrepository.backend.SimpleAasRepositoryFactory;
-import org.eclipse.digitaltwin.basyx.aasrepository.backend.SimpleConceptDescriptionRepositoryFactory;
-import org.eclipse.digitaltwin.basyx.aasrepository.backend.inmemory.AasInMemoryBackendProvider;
-import org.eclipse.digitaltwin.basyx.aasservice.backend.InMemoryAasServiceFactory;
-import org.eclipse.digitaltwin.basyx.conceptdescriptionrepository.ConceptDescriptionInMemoryBackendProvider;
+import org.eclipse.digitaltwin.basyx.aasrepository.backend.CrudAasRepositoryFactory;
+import org.eclipse.digitaltwin.basyx.aasservice.backend.InMemoryAasBackend;
 import org.eclipse.digitaltwin.basyx.conceptdescriptionrepository.ConceptDescriptionRepository;
+import org.eclipse.digitaltwin.basyx.conceptdescriptionrepository.backend.CrudConceptDescriptionRepositoryFactory;
+import org.eclipse.digitaltwin.basyx.conceptdescriptionrepository.backend.InMemoryConceptDescriptionBackend;
 import org.eclipse.digitaltwin.basyx.core.filerepository.InMemoryFileRepository;
 import org.eclipse.digitaltwin.basyx.core.pagination.PaginationInfo;
-import org.eclipse.digitaltwin.basyx.submodelrepository.SubmodelInMemoryBackendProvider;
 import org.eclipse.digitaltwin.basyx.submodelrepository.SubmodelRepository;
-import org.eclipse.digitaltwin.basyx.submodelrepository.backend.SimpleSubmodelRepositoryFactory;
+import org.eclipse.digitaltwin.basyx.submodelrepository.backend.CrudSubmodelRepositoryFactory;
 import org.eclipse.digitaltwin.basyx.submodelservice.DummySubmodelFactory;
-import org.eclipse.digitaltwin.basyx.submodelservice.InMemorySubmodelServiceFactory;
+import org.eclipse.digitaltwin.basyx.submodelservice.InMemorySubmodelBackend;
 import org.eclipse.digitaltwin.basyx.submodelservice.SubmodelServiceHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.*;
 
 public class TestAASEnvironmentSerialization {
 
-	private static final PaginationInfo NO_LIMIT_PAGINATION_INFO = new PaginationInfo(0, "");
 	public static final String AAS_TECHNICAL_DATA_ID = "shell001";
 	public static final String AAS_OPERATIONAL_DATA_ID = "shell002";
 	public static final String SUBMODEL_TECHNICAL_DATA_ID = "7A7104BDAB57E184";
@@ -88,9 +81,9 @@ public class TestAASEnvironmentSerialization {
 
 	@Before
 	public void setup() {
-		submodelRepository = new SimpleSubmodelRepositoryFactory(new SubmodelInMemoryBackendProvider(), new InMemorySubmodelServiceFactory(new InMemoryFileRepository())).create();
-		aasRepository = new SimpleAasRepositoryFactory(new AasInMemoryBackendProvider(), new InMemoryAasServiceFactory(new InMemoryFileRepository())).create();
-		conceptDescriptionRepository = new SimpleConceptDescriptionRepositoryFactory(new ConceptDescriptionInMemoryBackendProvider(), createDummyConceptDescriptions(), "cdRepo").create();
+		submodelRepository = CrudSubmodelRepositoryFactory.builder().backend(new InMemorySubmodelBackend()).fileRepository(new InMemoryFileRepository()).create();
+		aasRepository = CrudAasRepositoryFactory.builder().backend(new InMemoryAasBackend()).fileRepository(new InMemoryFileRepository()).create();
+		conceptDescriptionRepository = CrudConceptDescriptionRepositoryFactory.builder().backend(new InMemoryConceptDescriptionBackend()).remoteCollection(createDummyConceptDescriptions()).create();
 
 		for (Submodel submodel : createDummySubmodels()) {
 			submodelRepository.createSubmodel(submodel);
@@ -266,9 +259,9 @@ public class TestAASEnvironmentSerialization {
 	}
 
 	private void validateRepositoriesState() {
-		assertTrue(aasRepository.getAllAas(NO_LIMIT_PAGINATION_INFO).getResult().containsAll(createDummyShells()));
-		assertTrue(submodelRepository.getAllSubmodels(NO_LIMIT_PAGINATION_INFO).getResult().containsAll(createDummySubmodels()));
-		assertTrue(conceptDescriptionRepository.getAllConceptDescriptions(NO_LIMIT_PAGINATION_INFO).getResult().containsAll(createDummyConceptDescriptions()));
+		assertTrue(aasRepository.getAllAas(PaginationInfo.NO_LIMIT).getResult().containsAll(createDummyShells()));
+		assertTrue(submodelRepository.getAllSubmodels(PaginationInfo.NO_LIMIT).getResult().containsAll(createDummySubmodels()));
+		assertTrue(conceptDescriptionRepository.getAllConceptDescriptions(PaginationInfo.NO_LIMIT).getResult().containsAll(createDummyConceptDescriptions()));
 	}
 
 }

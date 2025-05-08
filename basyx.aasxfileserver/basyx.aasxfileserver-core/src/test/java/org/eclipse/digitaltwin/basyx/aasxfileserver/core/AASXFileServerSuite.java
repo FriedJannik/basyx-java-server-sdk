@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2024 the Eclipse BaSyx Authors
+ * Copyright (C) 2025 the Eclipse BaSyx Authors
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,17 +25,15 @@
 
 package org.eclipse.digitaltwin.basyx.aasxfileserver.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.digitaltwin.aas4j.v3.model.PackageDescription;
 import org.eclipse.digitaltwin.aas4j.v3.model.impl.DefaultPackageDescription;
 import org.eclipse.digitaltwin.basyx.aasxfileserver.AASXFileServer;
@@ -53,19 +51,18 @@ import org.junit.Test;
 public abstract class AASXFileServerSuite {
 
 	protected abstract AASXFileServer getAASXFileServer();
-	private static final PaginationInfo NO_LIMIT_PAGINATION_INFO = new PaginationInfo(0,"");
 	@Test
 	public void getAllAASXPackageIds() {
 
 		AASXFileServer server = getAASXFileServer();
-		DummyAASXFileServerFactory.createMultipleDummyAASXPackagesOnServer(server);
+		List<PackageDescription> pkgDescs = DummyAASXFileServerFactory.createMultipleDummyAASXPackagesOnServer(server);
 
-		PackageDescription expectedDescription1 = DummyAASXFileServerFactory.createDummyPackageDescription("1", DummyAASXFileServerFactory.FIRST_SHELL_IDS);
-		PackageDescription expectedDescription2 = DummyAASXFileServerFactory.createDummyPackageDescription("2", DummyAASXFileServerFactory.SECOND_SHELL_IDS);
+		PackageDescription expectedDescription1 = DummyAASXFileServerFactory.createDummyPackageDescription(pkgDescs.get(0).getPackageId(), DummyAASXFileServerFactory.FIRST_SHELL_IDS);
+		PackageDescription expectedDescription2 = DummyAASXFileServerFactory.createDummyPackageDescription(pkgDescs.get(1).getPackageId(), DummyAASXFileServerFactory.SECOND_SHELL_IDS);
 
 		List<PackageDescription> expectedPackageDescriptions = Arrays.asList(expectedDescription1, expectedDescription2);
 		
-		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds("",NO_LIMIT_PAGINATION_INFO);
+		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds("", PaginationInfo.NO_LIMIT);
 
 		List<PackageDescription> actualPackageDescriptions = pagedPackageDescriptions.getResult();
 
@@ -76,13 +73,13 @@ public abstract class AASXFileServerSuite {
 	public void getAllAASXPackageIdsByShellId() {
 
 		AASXFileServer server = getAASXFileServer();
-		DummyAASXFileServerFactory.createMultipleDummyAASXPackagesOnServer(server);
+		List<PackageDescription> pkgDescs = DummyAASXFileServerFactory.createMultipleDummyAASXPackagesOnServer(server);
 
-		PackageDescription expectedDescription = DummyAASXFileServerFactory.createDummyPackageDescription("2", DummyAASXFileServerFactory.SECOND_SHELL_IDS);
+		PackageDescription expectedDescription = DummyAASXFileServerFactory.createDummyPackageDescription(pkgDescs.get(1).getPackageId(), DummyAASXFileServerFactory.SECOND_SHELL_IDS);
 
 		List<PackageDescription> expectedPackageDescriptions = Arrays.asList(expectedDescription);
 
-		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds("AAS_ID_3",NO_LIMIT_PAGINATION_INFO);
+		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds("AAS_ID_3", PaginationInfo.NO_LIMIT);
 		List<PackageDescription> actualPackageDescriptions = pagedPackageDescriptions.getResult();
 		assertGetAllAASXPackageIds(expectedPackageDescriptions, actualPackageDescriptions);
 	}
@@ -93,7 +90,7 @@ public abstract class AASXFileServerSuite {
 		AASXFileServer server = getAASXFileServer();
 		PackageDescription actualPackageDescription = DummyAASXFileServerFactory.createFirstDummyAASXPackageOnServer(server);
 
-		PackageDescription expectedPackageDescription = DummyAASXFileServerFactory.createDummyPackageDescription("1", DummyAASXFileServerFactory.FIRST_SHELL_IDS);
+		PackageDescription expectedPackageDescription = DummyAASXFileServerFactory.createDummyPackageDescription(actualPackageDescription.getPackageId(), DummyAASXFileServerFactory.FIRST_SHELL_IDS);
 
 		assertEquals(expectedPackageDescription, actualPackageDescription);
 	}
@@ -103,7 +100,7 @@ public abstract class AASXFileServerSuite {
 		String shellId = "testShellId";
 
 		AASXFileServer server = getAASXFileServer();
-		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds(shellId,NO_LIMIT_PAGINATION_INFO);
+		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds(shellId, PaginationInfo.NO_LIMIT);
 		List<PackageDescription> packageDescriptions = pagedPackageDescriptions.getResult();
 		assertTrue(packageDescriptions.isEmpty());
 	}
@@ -125,10 +122,10 @@ public abstract class AASXFileServerSuite {
 		updateAASXPackage(server, initialPackageDescription.getPackageId(), DummyAASXFileServerFactory.SECOND_SHELL_IDS, DummyAASXFileServerFactory.class.getClassLoader().getResourceAsStream("TestAAS2.aasx"), DummyAASXFileServerFactory.SECOND_FILENAME);
 
 		PackageDescription expectedPackageDescription = new DefaultPackageDescription();
-		expectedPackageDescription.setPackageId("1");
+		expectedPackageDescription.setPackageId(initialPackageDescription.getPackageId());
 		expectedPackageDescription.setItems(DummyAASXFileServerFactory.SECOND_SHELL_IDS);
 
-		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds("",NO_LIMIT_PAGINATION_INFO);
+		CursorResult<List<PackageDescription>> pagedPackageDescriptions = server.getAllAASXPackageIds("", PaginationInfo.NO_LIMIT);
 		List<PackageDescription> actualPackageDescription = pagedPackageDescriptions.getResult();
 		assertUpdatedAASXPackageId(expectedPackageDescription, actualPackageDescription, server);
 	}
@@ -194,7 +191,7 @@ public abstract class AASXFileServerSuite {
 		assertEquals(1, actualPackageDescriptions.size());
 		assertTrue(actualPackageDescriptions.contains(expectedPackageDescription));
 
-		InputStream actualAASXFile = server.getAASXByPackageId("1");
+		InputStream actualAASXFile = server.getAASXByPackageId(expectedPackageDescription.getPackageId());
 		InputStream expectedAASXFile = DummyAASXFileServerFactory.class.getClassLoader().getResourceAsStream("TestAAS2.aasx");
 
 		assertTrue(IOUtils.contentEquals(expectedAASXFile, actualAASXFile));

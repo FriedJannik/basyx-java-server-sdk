@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2023 the Eclipse BaSyx Authors
+ * Copyright (C) 2025 the Eclipse BaSyx Authors
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -26,11 +26,7 @@
 package org.eclipse.digitaltwin.basyx.aasrepository.http.testconfig;
 
 import org.eclipse.digitaltwin.basyx.aasrepository.AasRepository;
-import org.eclipse.digitaltwin.basyx.aasrepository.backend.SimpleAasRepositoryFactory;
-import org.eclipse.digitaltwin.basyx.aasrepository.backend.inmemory.AasInMemoryBackendProvider;
-import org.eclipse.digitaltwin.basyx.aasservice.backend.InMemoryAasServiceFactory;
-import org.eclipse.digitaltwin.basyx.core.filerepository.InMemoryFileRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.eclipse.digitaltwin.basyx.aasrepository.backend.CrudAasRepositoryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -39,16 +35,14 @@ import org.springframework.context.annotation.Profile;
 /**
  * Configuration for tests
  * 
- * @author danish, kammognie
+ * @author danish, kammognie, mateusmolina
  *
  */
 @Configuration
 @Profile("httptests")
 public class DummyAasRepositoryConfig {
-
-	@Bean
-    @ConditionalOnMissingBean
-    public AasRepository createAasRepository() {
-		return new SimpleAasRepositoryFactory(new AasInMemoryBackendProvider(), new InMemoryAasServiceFactory(new InMemoryFileRepository())).create();
-    }
+  @Bean
+  AasRepository createAasRepository(CrudAasRepositoryFactory factory) {
+    return factory.create();
+  }
 }

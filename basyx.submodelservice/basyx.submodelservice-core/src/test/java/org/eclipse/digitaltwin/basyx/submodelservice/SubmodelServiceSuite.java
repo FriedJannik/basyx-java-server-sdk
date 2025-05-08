@@ -78,13 +78,11 @@ import org.junit.Test;
  *
  */
 public abstract class SubmodelServiceSuite {
-	protected static final PaginationInfo NO_LIMIT_PAGINATION_INFO = new PaginationInfo(null, null);
-
 	protected abstract SubmodelService getSubmodelService(Submodel submodel);
 
 	/**
 	 * SubmodelService independent way to check if a file exists in storage
-	 * 
+	 *
 	 * @param fileValue
 	 * @return
 	 */
@@ -107,7 +105,7 @@ public abstract class SubmodelServiceSuite {
 		Submodel technicalData = DummySubmodelFactory.createTechnicalDataSubmodel();
 		SubmodelService smService = getSubmodelService(technicalData);
 
-		assertTrue(technicalData.getSubmodelElements().containsAll(smService.getSubmodelElements(NO_LIMIT_PAGINATION_INFO).getResult()));
+		assertTrue(technicalData.getSubmodelElements().containsAll(smService.getSubmodelElements(PaginationInfo.NO_LIMIT).getResult()));
 	}
 
 	@Test
@@ -384,6 +382,19 @@ public abstract class SubmodelServiceSuite {
 	}
 
 	@Test
+	public void updateNonNestedSMEWithoutChange() {
+		Submodel technicalSubmodel = DummySubmodelFactory.createTechnicalDataSubmodel();
+		SubmodelService submodelService = getSubmodelService(technicalSubmodel);
+
+		String idShortPath = "dummyProperty";
+
+		Property property = createDummyProperty(idShortPath);
+		submodelService.createSubmodelElement(property);
+
+		submodelService.updateSubmodelElement(idShortPath, property);
+	}
+
+	@Test
 	public void updateNonFileSMEWithFileSME() {
 		Submodel technicalSubmodel = DummySubmodelFactory.createTechnicalDataSubmodel();
 		SubmodelService submodelService = getSubmodelService(technicalSubmodel);
@@ -451,6 +462,23 @@ public abstract class SubmodelServiceSuite {
 		submodelService.setFileValue(idShortPathPropertyInSmeCol, "jsonFile2.json", getInputStreamOfDummyFile(DUMMY_JSON_2));
 
 		assertStoredFileContentEquals(submodelService, idShortPathPropertyInSmeCol, DUMMY_JSON_2);
+	}
+
+	@Test
+	public void updateSMEInSubmodelElementList(){
+		Submodel operationDataSubmodel = DummySubmodelFactory.createOperationalDataSubmodelWithHierarchicalSubmodelElements();
+		SubmodelService submodelService = getSubmodelService(operationDataSubmodel);
+
+		DefaultProperty submodelElement = (DefaultProperty) submodelService.getSubmodelElement(generateIdShortPath());
+
+		String expectedValue = "1308";
+		submodelElement.setValue(expectedValue);
+
+		submodelService.updateSubmodelElement(generateIdShortPath(), submodelElement);
+
+		DefaultProperty actualElement = (DefaultProperty) submodelService.getSubmodelElement(generateIdShortPath());
+
+        assertEquals(expectedValue, actualElement.getValue());
 	}
 
 	@Test

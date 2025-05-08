@@ -39,15 +39,44 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
+
       - name: Build AAS Repository Docker Image
         run: |
           mvn package -DskipTests -Ddocker.namespace=test --pl "org.eclipse.digitaltwin.basyx:basyx.aasrepository.component"
 
       - name: Test AAS Repository Docker Image
         run: chmod +x ./.github/workflows/scripts/build_start_docker_image.sh && ./.github/workflows/scripts/build_start_docker_image.sh test/aas-repository ${VERSION} test_aas_repository
+
+      - name: Clean up
+        run: exit 0
+
+  build-test-aas-repository-mongodb:
+    runs-on: ubuntu-latest
+    name: AAS Repository MongoDB - Build and Start Docker Image
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Build BaSyx
+        run: |
+          mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
+
+      - name: Build AAS Repository Docker Image
+        run: |
+          mvn package -DskipTests -Ddocker.namespace=test --pl "org.eclipse.digitaltwin.basyx:basyx.aasrepository.component"
+
+      - name: Test AAS Repository MongoDB Docker Image
+        run: chmod +x ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh && ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh ./ci/workflows/test-aas-repository-mongodb.yml test_aas_repository
 
       - name: Clean up
         run: exit 0
@@ -64,6 +93,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -74,6 +104,33 @@ jobs:
 
       - name: Test AAS Environment Docker Image
         run: chmod +x ./.github/workflows/scripts/build_start_docker_image.sh && ./.github/workflows/scripts/build_start_docker_image.sh test/aas-environment ${VERSION} test_aas_environment
+
+      - name: Clean up
+        run: exit 0
+
+  build-test-aas-environment-mongodb:
+    runs-on: ubuntu-latest
+    name: AAS Environment MongoDB - Build and Start Docker Image
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Build BaSyx
+        run: |
+          mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
+
+      - name: Build AAS Environment Docker Image
+        run: |
+          mvn package -DskipTests -Ddocker.namespace=test --pl "org.eclipse.digitaltwin.basyx:basyx.aasenvironment.component"
+
+      - name: Test AAS Environment MongoDB Docker Image
+        run: chmod +x ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh && ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh ./ci/workflows/test-aas-environment-mongodb.yml test_aas_environment
 
       - name: Clean up
         run: exit 0
@@ -90,6 +147,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -100,6 +158,33 @@ jobs:
 
       - name: Test Concept Description Repository Docker Image
         run: chmod +x ./.github/workflows/scripts/build_start_docker_image.sh && ./.github/workflows/scripts/build_start_docker_image.sh test/conceptdescription-repository ${VERSION} test_conceptdescription_repository
+
+      - name: Clean up
+        run: exit 0
+
+  build-test-cd-repository-mongodb:
+    runs-on: ubuntu-latest
+    name: Concept Description Repository MongoDB - Build and Start Docker Image
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Build BaSyx
+        run: |
+          mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
+
+      - name: Build Concept Description Repository Docker Image
+        run: |
+          mvn package -DskipTests -Ddocker.namespace=test --pl "org.eclipse.digitaltwin.basyx:basyx.conceptdescriptionrepository.component"
+
+      - name: Test Concept Description Repository MongoDB Docker Image
+        run: chmod +x ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh && ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh ./ci/workflows/test-cd-repository-mongodb.yml test_cd_repository
 
       - name: Clean up
         run: exit 0
@@ -116,6 +201,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -130,6 +216,32 @@ jobs:
       - name: Clean up
         run: exit 0
 
+  build-test-aas-discovery-mongodb:
+    runs-on: ubuntu-latest
+    name: AAS Discovery MongoDB - Build and Start Docker Image
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Build BaSyx
+        run: |
+          mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
+
+      - name: Build AAS Discovery Docker Image
+        run: |
+          mvn package -DskipTests -Ddocker.namespace=test --pl "org.eclipse.digitaltwin.basyx:basyx.aasdiscoveryservice.component"
+
+      - name: Test AAS Discovery MongoDB Docker Image
+        run: chmod +x ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh && ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh ./ci/workflows/test-aas-discovery-mongodb.yml test_aas_discovery
+
+      - name: Clean up
+        run: exit 0
   build-test-aasx-fileserver:
     runs-on: ubuntu-latest
     name: AASX File Server - Build and Start Docker Image
@@ -142,6 +254,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -168,6 +281,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -178,6 +292,33 @@ jobs:
 
       - name: Test Submodel Repository Docker Image
         run: chmod +x ./.github/workflows/scripts/build_start_docker_image.sh && ./.github/workflows/scripts/build_start_docker_image.sh test/submodel-repository ${VERSION} test_submodel_repository
+
+      - name: Clean up
+        run: exit 0
+
+  build-test-submodel-repository-mongodb:
+    runs-on: ubuntu-latest
+    name: Submodel Repository MongoDB - Build and Start Docker Image
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Build BaSyx
+        run: |
+          mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
+
+      - name: Build Submodel Repository Docker Image
+        run: |
+          mvn package -DskipTests -Ddocker.namespace=test --pl "org.eclipse.digitaltwin.basyx:basyx.submodelrepository.component"
+
+      - name: Test Submodel Repository MongoDB Docker Image
+        run: chmod +x ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh && ./.github/workflows/scripts/build_start_docker_image_docker_compose.sh ./ci/workflows/test-submodel-repository-mongodb.yml test_submodel_repository
 
       - name: Clean up
         run: exit 0
@@ -194,6 +335,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -220,6 +362,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -246,6 +389,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -272,6 +416,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -298,6 +443,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -324,6 +470,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -350,6 +497,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -376,6 +524,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}
@@ -402,6 +551,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
+
       - name: Build BaSyx
         run: |
           mvn clean install ${MVN_ARGS_BUILD_BASYX_NO_TESTS}

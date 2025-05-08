@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.digitaltwin.aas4j.v3.model.OperationRequest;
 import org.eclipse.digitaltwin.aas4j.v3.model.OperationResult;
 import org.eclipse.digitaltwin.aas4j.v3.model.OperationVariable;
@@ -44,9 +45,13 @@ import org.eclipse.digitaltwin.basyx.core.pagination.CursorResult;
 import org.eclipse.digitaltwin.basyx.core.pagination.PaginationInfo;
 import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifier;
 import org.eclipse.digitaltwin.basyx.http.Base64UrlEncodedIdentifierSize;
+import org.eclipse.digitaltwin.basyx.http.Base64UrlEncoder;
+import org.eclipse.digitaltwin.basyx.http.CustomTypeCloneFactory;
 import org.eclipse.digitaltwin.basyx.http.pagination.Base64UrlEncodedCursor;
 import org.eclipse.digitaltwin.basyx.http.pagination.PagedResult;
 import org.eclipse.digitaltwin.basyx.http.pagination.PagedResultPagingMetadata;
+import org.eclipse.digitaltwin.basyx.operation.OperationRequestExecutor;
+import org.eclipse.digitaltwin.basyx.operation.Invokable;
 import org.eclipse.digitaltwin.basyx.pagination.GetSubmodelElementsResult;
 import org.eclipse.digitaltwin.basyx.submodelrepository.SubmodelRepository;
 import org.eclipse.digitaltwin.basyx.submodelrepository.http.pagination.GetSubmodelsResult;
@@ -55,6 +60,7 @@ import org.eclipse.digitaltwin.basyx.submodelservice.value.SubmodelValueOnly;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,12 +79,14 @@ import jakarta.validation.constraints.Min;
 @RestController
 public class SubmodelRepositoryApiHTTPController implements SubmodelRepositoryHTTPApi {
 
-	private SubmodelRepository repository;
+	private final SubmodelRepository repository;
+	private final ObjectMapper objectMapper;
 
 	@Autowired
-	public SubmodelRepositoryApiHTTPController(SubmodelRepository repository) {
+	public SubmodelRepositoryApiHTTPController(SubmodelRepository repository, ObjectMapper objectMapper) {
 		this.repository = repository;
-	}
+        this.objectMapper = objectMapper;
+    }
 
 	@Override
 	public ResponseEntity<Submodel> postSubmodel(@Parameter(in = ParameterIn.DEFAULT, description = "Submodel object", required = true, schema = @Schema()) @Valid @RequestBody Submodel body) {
@@ -115,7 +123,12 @@ public class SubmodelRepositoryApiHTTPController implements SubmodelRepositoryHT
 
 		PaginationInfo pInfo = new PaginationInfo(limit, decodedCursor);
 
-		CursorResult<List<Submodel>> cursorResult = repository.getAllSubmodels(pInfo);
+	    CursorResult<List<Submodel>> cursorResult;
+	    if (semanticId != null) {
+	        cursorResult = repository.getAllSubmodels(semanticId.getIdentifier(), pInfo);
+	    } else {
+	        cursorResult = repository.getAllSubmodels(pInfo);
+	    }
 
 		GetSubmodelsResult paginatedSubmodel = new GetSubmodelsResult();
 
@@ -168,14 +181,18 @@ public class SubmodelRepositoryApiHTTPController implements SubmodelRepositoryHT
 
 	@Override
 	public ResponseEntity<SubmodelElement> postSubmodelElementByPathSubmodelRepo(Base64UrlEncodedIdentifier submodelIdentifier, String idShortPath, @Valid SubmodelElement body, @Valid String level, @Valid String extent) {
-		repository.createSubmodelElement(submodelIdentifier.getIdentifier(), idShortPath, body);
-		return new ResponseEntity<SubmodelElement>(HttpStatus.CREATED);
+		SubmodelElement validatedBody = new CustomTypeCloneFactory<>(SubmodelElement.class, objectMapper).create(body);
+
+		repository.createSubmodelElement(submodelIdentifier.getIdentifier(), idShortPath, validatedBody);
+		return new ResponseEntity<>(validatedBody, HttpStatus.CREATED);
 	}
 
 	@Override
 	public ResponseEntity<SubmodelElement> postSubmodelElementSubmodelRepo(Base64UrlEncodedIdentifier submodelIdentifier, @Valid SubmodelElement body) {
-		repository.createSubmodelElement(submodelIdentifier.getIdentifier(), body);
-		return new ResponseEntity<SubmodelElement>(HttpStatus.CREATED);
+		SubmodelElement validatedBody = new CustomTypeCloneFactory<>(SubmodelElement.class, objectMapper).create(body);
+
+		repository.createSubmodelElement(submodelIdentifier.getIdentifier(), validatedBody);
+		return new ResponseEntity<>(validatedBody, HttpStatus.CREATED);
 	}
 
 	@Override
@@ -214,7 +231,11 @@ public class SubmodelRepositoryApiHTTPController implements SubmodelRepositoryHT
 	public ResponseEntity<Resource> getFileByPath(Base64UrlEncodedIdentifier submodelIdentifier, String idShortPath) {
 		Resource resource = new FileSystemResource(repository.getFileByPathSubmodel(submodelIdentifier.getIdentifier(), idShortPath));
 
-		return new ResponseEntity<Resource>(resource, HttpStatus.OK);
+	    String fileName = resource.getFilename();
+		
+	    return ResponseEntity.ok()
+	            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+	            .body(resource);
 	}
 
 	@Override
@@ -224,7 +245,7 @@ public class SubmodelRepositoryApiHTTPController implements SubmodelRepositoryHT
 			fileInputstream = file.getInputStream();
 			repository.setFileValue(submodelIdentifier.getIdentifier(), idShortPath, fileName, fileInputstream);
 			closeInputStream(fileInputstream);
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 		} catch (ElementDoesNotExistException e) {
 			closeInputStream(fileInputstream);
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
@@ -272,28 +293,12 @@ public class SubmodelRepositoryApiHTTPController implements SubmodelRepositoryHT
 
 	@Override
 	public ResponseEntity<OperationResult> invokeOperationSubmodelRepo(Base64UrlEncodedIdentifier submodelIdentifier, String idShortPath, @Valid OperationRequest body, @Valid Boolean async) {
-		List<OperationVariable> inVars = new ArrayList<>();
-		inVars.addAll(body.getInputArguments());
-		inVars.addAll(body.getInoutputArguments());
 
-		List<OperationVariable> result = Arrays.asList(repository.invokeOperation(submodelIdentifier.getIdentifier(), idShortPath, inVars.toArray(new OperationVariable[0])));
+		// TODO: #566 Add async operation execution support to
+		// SubmodelRepositoryController
 
-		List<OperationVariable> outVars = new ArrayList<>(result);
-		List<OperationVariable> inoutputVars = new ArrayList<>();
-
-		if (!body.getInoutputArguments().isEmpty()) {
-			List<String> inoutputVarsIdShorts = body.getInoutputArguments().stream().map(OperationVariable::getValue).map(SubmodelElement::getIdShort).toList();
-
-			inoutputVars = result.stream().filter(opVar -> inoutputVarsIdShorts.contains(opVar.getValue().getIdShort())).toList();
-
-			outVars.removeAll(inoutputVars);
-		}
-
-		return ResponseEntity.ok(createOperationResult(outVars, inoutputVars));
-	}
-
-	private OperationResult createOperationResult(List<OperationVariable> outputVars, List<OperationVariable> inoutputVars) {
-		return new DefaultOperationResult.Builder().outputArguments(outputVars).inoutputArguments(inoutputVars).build();
+		Invokable invokable = inArgs -> repository.invokeOperation(submodelIdentifier.getIdentifier(), idShortPath, inArgs);
+		return ResponseEntity.ok(OperationRequestExecutor.executeOperationRequestSynchronously(invokable, body));
 	}
 
 	private String getEncodedCursorFromCursorResult(CursorResult<?> cursorResult) {

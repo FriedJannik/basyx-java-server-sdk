@@ -75,20 +75,22 @@ public class BasyxRegistryApiDelegate implements ShellDescriptorsApiDelegate {
 		result.setResult(allDescriptors.getResult());
 		for(int i = 0; i<allDescriptors.getResult().size(); i++) {
 			AssetAdministrationShellDescriptor desc = allDescriptors.getResult().get(i);
-			if (desc.getSpecificAssetIds() != null || !desc.getSpecificAssetIds().isEmpty()) {
-				List<SpecificAssetId> newIdsWithoutExternalSubjectID = new ArrayList<>();
-				for(SpecificAssetId sId : desc.getSpecificAssetIds()) {
-					SpecificAssetId newId = new SpecificAssetId(sId.getName(), sId.getValue());
-					if (sId.getSupplementalSemanticIds() != null) {
-						newId.setSupplementalSemanticIds(sId.getSupplementalSemanticIds());
+			try {
+				if (desc.getSpecificAssetIds() != null || !desc.getSpecificAssetIds().isEmpty()) {
+					List<SpecificAssetId> newIdsWithoutExternalSubjectID = new ArrayList<>();
+					for (SpecificAssetId sId : desc.getSpecificAssetIds()) {
+						SpecificAssetId newId = new SpecificAssetId(sId.getName(), sId.getValue());
+						if (sId.getSupplementalSemanticIds() != null) {
+							newId.setSupplementalSemanticIds(sId.getSupplementalSemanticIds());
+						}
+						if (sId.getSemanticId() != null) {
+							newId.setSemanticId(sId.getSemanticId());
+						}
+						newIdsWithoutExternalSubjectID.add(newId);
 					}
-					if (sId.getSemanticId() != null) {
-						newId.setSemanticId(sId.getSemanticId());
-					}
-					newIdsWithoutExternalSubjectID.add(newId);
+					desc.setSpecificAssetIds(newIdsWithoutExternalSubjectID);
 				}
-				desc.setSpecificAssetIds(newIdsWithoutExternalSubjectID);
-			}
+			}catch(Exception ignored){}
 		}
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
@@ -109,20 +111,22 @@ public class BasyxRegistryApiDelegate implements ShellDescriptorsApiDelegate {
 	public ResponseEntity<AssetAdministrationShellDescriptor> getAssetAdministrationShellDescriptorById(String aasIdentifier) {
 		AssetAdministrationShellDescriptor desc = storage.getAasDescriptor(aasIdentifier);
 
-		if (desc.getSpecificAssetIds() != null || !desc.getSpecificAssetIds().isEmpty()) {
-			List<SpecificAssetId> newIdsWithoutExternalSubjectID = new ArrayList<>();
-			for(SpecificAssetId sId : desc.getSpecificAssetIds()) {
-				SpecificAssetId newId = new SpecificAssetId(sId.getName(), sId.getValue());
-				if (sId.getSupplementalSemanticIds() != null) {
-					newId.setSupplementalSemanticIds(sId.getSupplementalSemanticIds());
+		try {
+			if (desc.getSpecificAssetIds() != null || !desc.getSpecificAssetIds().isEmpty()) {
+				List<SpecificAssetId> newIdsWithoutExternalSubjectID = new ArrayList<>();
+				for(SpecificAssetId sId : desc.getSpecificAssetIds()) {
+					SpecificAssetId newId = new SpecificAssetId(sId.getName(), sId.getValue());
+					if (sId.getSupplementalSemanticIds() != null) {
+						newId.setSupplementalSemanticIds(sId.getSupplementalSemanticIds());
+					}
+					if (sId.getSemanticId() != null) {
+						newId.setSemanticId(sId.getSemanticId());
+					}
+					newIdsWithoutExternalSubjectID.add(newId);
 				}
-				if (sId.getSemanticId() != null) {
-					newId.setSemanticId(sId.getSemanticId());
-				}
-				newIdsWithoutExternalSubjectID.add(newId);
+				desc.setSpecificAssetIds(newIdsWithoutExternalSubjectID);
 			}
-			desc.setSpecificAssetIds(newIdsWithoutExternalSubjectID);
-		}
+		}catch(Exception ignored){}
 		return new ResponseEntity<>(desc, HttpStatus.OK);
 	}
 

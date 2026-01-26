@@ -81,6 +81,7 @@ public class SearchAasRegistryApiHTTPController implements SearchAasRegistryHTTP
                     String identifier = ((ObjectNode) id).get("id").asText();
                     AssetAdministrationShellDescriptor desc = backend.getAasDescriptor(identifier);
                     aasDescs.add(desc);
+                    try {
                     if (desc.getSpecificAssetIds() != null || !desc.getSpecificAssetIds().isEmpty()) {
                         List<SpecificAssetId> newIdsWithoutExternalSubjectID = new ArrayList<>();
                         for(SpecificAssetId sId : desc.getSpecificAssetIds()) {
@@ -95,6 +96,7 @@ public class SearchAasRegistryApiHTTPController implements SearchAasRegistryHTTP
                         }
                         desc.setSpecificAssetIds(newIdsWithoutExternalSubjectID);
                     }
+            }catch(Exception ignored){}
                 }
                 queryResponse.result = aasDescs.stream()
                         .map(aasDesc -> (Object) aasDesc)

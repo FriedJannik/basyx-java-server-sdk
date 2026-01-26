@@ -27,6 +27,7 @@ package org.eclipse.digitaltwin.basyx.aasregistry.feature.search;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eclipse.digitaltwin.basyx.aasregistry.model.AssetAdministrationShellDescriptor;
+import org.eclipse.digitaltwin.basyx.aasregistry.model.SpecificAssetId;
 import org.eclipse.digitaltwin.basyx.aasregistry.service.storage.AasRegistryStorage;
 import org.eclipse.digitaltwin.basyx.http.pagination.Base64UrlEncodedCursor;
 import org.eclipse.digitaltwin.basyx.querycore.query.model.AASQuery;
@@ -78,9 +79,22 @@ public class SearchAasRegistryApiHTTPController implements SearchAasRegistryHTTP
                 List<AssetAdministrationShellDescriptor> aasDescs = new ArrayList<>();
                 for (Object id : queryResponse.result) {
                     String identifier = ((ObjectNode) id).get("id").asText();
-                    AssetAdministrationShellDescriptor aasDesc = backend.getAasDescriptor(identifier);
-                    aasDescs.add(aasDesc);
-
+                    AssetAdministrationShellDescriptor desc = backend.getAasDescriptor(identifier);
+                    aasDescs.add(desc);
+                    if (desc.getSpecificAssetIds() != null || !desc.getSpecificAssetIds().isEmpty()) {
+                        List<SpecificAssetId> newIdsWithoutExternalSubjectID = new ArrayList<>();
+                        for(SpecificAssetId sId : desc.getSpecificAssetIds()) {
+                            SpecificAssetId newId = new SpecificAssetId(sId.getName(), sId.getValue());
+                            if (sId.getSupplementalSemanticIds() != null) {
+                                newId.setSupplementalSemanticIds(sId.getSupplementalSemanticIds());
+                            }
+                            if (sId.getSemanticId() != null) {
+                                newId.setSemanticId(sId.getSemanticId());
+                            }
+                            newIdsWithoutExternalSubjectID.add(newId);
+                        }
+                        desc.setSpecificAssetIds(newIdsWithoutExternalSubjectID);
+                    }
                 }
                 queryResponse.result = aasDescs.stream()
                         .map(aasDesc -> (Object) aasDesc)
